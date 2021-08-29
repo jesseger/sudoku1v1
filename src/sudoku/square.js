@@ -9,6 +9,7 @@ export default function Square({value, onSquareChange}) {//redo this: pass only 
     else{
         return (
             <label>{value}</label>
+            //<label className="squareWrong" >{value}</label>
         )
     }
 }

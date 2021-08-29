@@ -4,6 +4,7 @@ import Game from './sudoku/game.js';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import React, { useState } from 'react';
 import EntryPage from './connection/entrypage.js';
+import WaitingPage from './connection/waitingpage.js';
 
 function App() {
   //Page has to be changed on redirect and on button click in EntryPage
@@ -25,7 +26,8 @@ function App() {
           </Route>
           <Route path = "/game/:gameid" exact>
             {didRedirect ? 
-              <Game initialBoard= "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"/>
+              //<Game initialBoard= "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"/>
+              <WaitingPage isCreator={true} username={userName} />
               :
               <EntryPage setUserName={setUserName} setDidRedirect={setDidRedirect} isCreator={false}/>
             }
