@@ -17,8 +17,6 @@ class Game extends React.Component {
     }
 
     componentDidMount(){
-        //get solution to the generated board
-        //this.solvedBoard = '417369825632158947958724316825437169791586432346912758289643571573291684164875293';
         this.solvedBoard = this.props.solvedBoard
         console.log(`Received ${this.props.initialBoard}, ${this.props.solvedBoard}`)
         socket.on('newOpponentMove', data =>{

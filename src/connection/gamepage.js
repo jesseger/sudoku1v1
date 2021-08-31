@@ -2,16 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Game from '../sudoku/game.js'
 import Board from '../sudoku/board.js'
-const socket  = require('../connection/socket').socket //Our client socket
+const socket  = require('./socket').socket //Our client socket
 
-//Maybe rename file to GamePage
-
-export default function WaitingPage(props) {
+export default function GamePage(props) {
     const [opponentName, setOpponentName] = useState('');
     const [isPlayerA, setIsPlayerA] = useState(false);
     const [joinStatus, setJoinStatus] = useState("possible")
     const [gameBoard, setGameBoard] = useState(["..................................................................................",".................................................................................."])
-    
+    const [timeRemaining, setTimeRemaining] = useState([0,0]) //Remaining times in seconds for each player
+
     const { gameid } = useParams()
 
     //Emit only on first render
@@ -24,6 +23,7 @@ export default function WaitingPage(props) {
 
         socket.on('playerTwoJoined',data=>{
             setGameBoard([data.generatedBoard, data.generatedSolution])
+            setTimeRemaining([data.timeInSeconds, data.timeInSeconds])
             if(props.isCreator){
                 setOpponentName(data.username2)
                 setIsPlayerA(data.creatorIsPlayerA)
