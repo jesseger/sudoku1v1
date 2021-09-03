@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 19px;
+  font-size: 15px;
 }
 
 code {
@@ -17,6 +17,7 @@ table.sudokuboard {
   border: 3px solid #1b79d1;
   border-collapse: collapse;
   margin: 20px auto;
+  font-size: 30px;
 }
 input{box-sizing:border-box}
 
@@ -62,9 +63,6 @@ tr:nth-child(3n) {
   background-color: white;
 }
 
-/*.container{
-  align
-}*/
 
 
 

@@ -9,7 +9,7 @@ export default function GamePage(props) {
     const [isPlayerA, setIsPlayerA] = useState(false);
     const [joinStatus, setJoinStatus] = useState("possible")
     const [gameBoard, setGameBoard] = useState(["..................................................................................",".................................................................................."])
-    const [timeRemaining, setTimeRemaining] = useState([0,0]) //Remaining times in seconds for each player
+    const [gameDuration, setGameDuration] = useState(0)
 
     const { gameid } = useParams()
 
@@ -23,14 +23,15 @@ export default function GamePage(props) {
 
         socket.on('playerTwoJoined',data=>{
             setGameBoard([data.generatedBoard, data.generatedSolution])
-            setTimeRemaining([data.timeInSeconds, data.timeInSeconds])
+            setGameDuration(data.timeInSeconds*1000)
+
             if(props.isCreator){
-                setOpponentName(data.username2)
                 setIsPlayerA(data.creatorIsPlayerA)
+                setOpponentName(data.username2)
             }
             else{
-                setOpponentName(data.username1)
                 setIsPlayerA(!data.creatorIsPlayerA)
+                setOpponentName(data.username1)
             }
             
         })
@@ -56,7 +57,7 @@ export default function GamePage(props) {
             :
                 <div>
                     <h1>{`Opponent: ${opponentName}`}</h1>
-                    <Game initialBoard={gameBoard[0]} solvedBoard={gameBoard[1]} isPlayerA={isPlayerA} id={gameid}/>
+                    <Game initialBoard={gameBoard[0]} solvedBoard={gameBoard[1]} isPlayerA={isPlayerA} id={gameid} timeInMs={gameDuration}/>
                     <h1>{`You: ${props.username}`}</h1>
                 </div>
             }

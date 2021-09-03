@@ -10,8 +10,8 @@ class EntryPage extends React.Component{
         didGetUserName: false,
         userName: "",
         userInput: "", //button has to be disabled if empty
-        difficulty: 40,
-        timeInSeconds: 300
+        difficulty: 64,
+        timeInSeconds: 20//300
     }
 
     constructor(props){
@@ -62,7 +62,7 @@ class EntryPage extends React.Component{
                         <input type="text" value={this.state.userInput} ref={this.userInputField} onChange = {this.handleUserInput}/>
                         <h2 id="difficulty">Difficulty: </h2>
                         <Slider
-                        defaultValue={40}
+                        defaultValue={60}
                         aria-labelledby="difficulty"
                         step={1}
                         min={17}
@@ -92,7 +92,7 @@ class EntryPage extends React.Component{
                             this.createRoom()
                             
                             var newUsername = this.state.userInput
-                            this.props.setUserName(newUsername) //This shouldn't rerender EntryPage, so maybe pass setUserName as Callback
+                            this.props.setUserName(newUsername) 
                             this.setState({didGetUserName: true, userName: newUsername})
                             console.log("EntryPage.state.userName: ",this.state.userName) 
                         }}> Create Game </button>
@@ -107,7 +107,7 @@ class EntryPage extends React.Component{
             }
             else{
                 // Let player type in name
-                return( //DEBUG Fragment instead of div
+                return( 
                     <div /*className="container"*/> 
                         <h1 style={{textAlign: "center", marginTop: String((window.innerHeight / 3)) + "px"}}>Type in your username:</h1>
                         <input type="text" value={this.state.userInput} ref={this.userInputField} onChange = {this.handleUserInput}/>
@@ -119,10 +119,10 @@ class EntryPage extends React.Component{
                             this.gameID = joiningGameID
                             
                             var newUsername = this.state.userInput
-                            this.props.setUserName(newUsername) //This shouldn't rerender EntryPage, so maybe pass setUserName as Callback
+                            this.props.setUserName(newUsername) 
                             this.setState({didGetUserName: true, userName: newUsername})
                             console.log("EntryPage.state.userName: ",this.state.userName)
-                        }}> Create Game </button>
+                        }}> Join Game </button>
                     </div>
                 )
             }
