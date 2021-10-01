@@ -1,9 +1,9 @@
-//import { render } from '@testing-library/react';
 import { Button } from '@material-ui/core';
 import React from 'react';
 import { socket } from '../connection/socket.js';
+import { GameContext } from '../context.js';
 import Board from './board.js';
-import Clock from './clock.js'
+import Clock from '../components/clock.js'
 
 class Game extends React.Component {
     constructor(props) {
@@ -11,30 +11,50 @@ class Game extends React.Component {
         this.state = {
             gameBoard: props.initialBoard, 
             isPlayerANext: true,
-            gameLoser: null, //null,'A','B'
+            gameLoserIsA: null, //null,true, false
         };
-        this.solvedBoard =this.props.solvedBoard
+        this.solvedBoard =props.solvedBoard
         this.wrongIndex=-1
         this.handleSquareChange=this.handleSquareChange.bind(this)
-        this.setMyClockRef = this.setMyClockRef.bind(this)
-        this.setOppClockRef = this.setOppClockRef.bind(this)
-        this.myClock = null
-        this.opponentClock = null 
+        this.myClock = React.createRef()
+        this.opponentClock = React.createRef()
         this.endTime = Date.now()+props.timeInMs //sets both clocks to the chosen time
         this.handleTimeOut= this.handleTimeOut.bind(this)
+        this.onNewMove = this.onNewMove.bind(this);
+        this.onSurrender = this.onSurrender.bind(this);
     }
 
     isDraw(){
-        return !this.state.gameLoser && this.state.gameBoard===this.solvedBoard
+        return this.state.gameLoserIsA===null && this.state.gameBoard===this.solvedBoard
     }
 
-    setMyClockRef(ref){
-        this.myClock = ref
-    }
-
-    setOppClockRef(ref){
-        this.opponentClock = ref
-    }
+    onNewMove(data) {
+        if (data.isPlayerANext === this.props.isPlayerA) {
+          this.opponentClock.current.pause();
+          this.myClock.current.start();
+        } else {
+          this.opponentClock.current.start();
+          this.myClock.current.pause();
+        }
+        let idx = data.col + 9 * data.row;
+        let boardAfterOppMove =
+          this.state.gameBoard.substring(0, idx) +
+          data.val +
+          this.state.gameBoard.substring(idx + 1);
+        this.wrongIndex = data.gameLoserIsA!==null ? idx : this.wrongIndex;
+        this.setState({
+          gameBoard: boardAfterOppMove,
+          gameLoserIsA: data.gameLoserIsA,
+          isPlayerANext: data.isPlayerANext,
+        });
+        if (data.gameLoserIsA!==null || this.isDraw()) {
+          this.handleGameOver(data.gameLoserIsA);
+        }
+      }
+    
+      onSurrender(data) {
+        this.handleSurrender(data.loserIsPlayerA);
+      }
 
     componentDidMount(){
         if(this.props.isPlayerA){
@@ -43,40 +63,29 @@ class Game extends React.Component {
         else{
             this.opponentClock.current.start()
         }
-        socket.on('newMove', data =>{
-            if(data.isPlayerANext===this.props.isPlayerA){
-                this.opponentClock.current.pause()
-                this.myClock.current.start()
-            }
-            else{
-                this.opponentClock.current.start()
-                this.myClock.current.pause()
-            }
-            let idx=data.col+9*data.row;
-            let boardAfterOppMove = this.state.gameBoard.substring(0,idx) + data.val + this.state.gameBoard.substring(idx+1);
-            this.wrongIndex = data.gameLoser? idx : this.wrongIndex
-            this.setState({gameBoard: boardAfterOppMove, gameLoser: data.gameLoser,isPlayerANext: data.isPlayerANext})
-            if(data.gameLoser){
-                this.handleGameOver(data.gameLoser)
-            }
-            else if(this.isDraw()){
-                this.handleGameOver(null)
-            }
-        })
+        socket.on('newMove', this.onNewMove);
+
+        socket.on('surrender', this.onSurrender);
+    }
+
+    componentWillUnmount(){
+        socket.off('newMove', this.onNewMove)
+        socket.off('surrender', this.onSurrender)
     }
 
     handleTimeOut(isMyTimer){
-        this.handleGameOver((this.props.isPlayerA&&isMyTimer) || (!this.props.isPlayerA &&!isMyTimer)?'A':'B') //this is a wrong condition, I'm dumb as fuck
-        if(isMyTimer){
-            alert("You ran out of time!")
-        }
+        this.handleGameOver((this.props.isPlayerA&&isMyTimer) || (!this.props.isPlayerA &&!isMyTimer)?true:false)
     }
 
-    handleGameOver(gameLoser){
+    handleGameOver(gameLoserIsA){
         this.myClock.current.pause()
         this.opponentClock.current.pause()
-        this.setState({gameLoser: gameLoser})
-        console.log('Game is over')
+        this.setState(prevState => ({...prevState, gameLoserIsA: gameLoserIsA}))
+        this.props.onGameOver(gameLoserIsA)
+    }
+
+    handleSurrender(gameLoserIsA){
+        this.handleGameOver(gameLoserIsA)
     }
 
     handleSquareChange(row, col, val) {
@@ -90,7 +99,7 @@ class Game extends React.Component {
             
             if(!(this.solvedBoard[idx]===val)){ //Wrong guess
                 this.wrongIndex=idx
-                gameLoserAfterMove= this.props.isPlayerA? 'A':'B'
+                gameLoserAfterMove= this.props.isPlayerA? true:false
             }
 
             socket.emit('newMove',{
@@ -99,37 +108,28 @@ class Game extends React.Component {
                 col: col,
                 val: val,
                 isPlayerANext: isPlayerANextAfterMove,
-                gameLoser: gameLoserAfterMove
+                gameLoserIsA: gameLoserAfterMove
             })
         }
     }
-
-
+    
     render(){
         return( 
         <React.Fragment>
-            <Clock refCallback={this.setOppClockRef} date={this.endTime} onTimeOut={() => this.handleTimeOut(false)}/>
+            <Clock isWhite={!this.props.isPlayerA} name={this.context.oppName} ref={this.opponentClock} date={this.endTime} onTimeOut={() => this.handleTimeOut(false)}/>
             <Board gameBoard={this.state.gameBoard} onSquareChange={this.handleSquareChange} wrongIndex={this.wrongIndex}/>
-            <Clock refCallback={this.setMyClockRef} date={this.endTime} onTimeOut={() => this.handleTimeOut(true)}/>
+            <Clock isWhite={this.props.isPlayerA} name={this.context.myName} ref={this.myClock} date={this.endTime} onTimeOut={() => this.handleTimeOut(true)}/>
 
-            {this.state.gameLoser?
-                ((this.state.gameLoser==='A' && this.props.isPlayerA) || (this.state.gameLoser==='B' && !this.props.isPlayerA))?
-                <>
-                <h2>{"Game over. Your opponent won."}</h2>
-                </>
-                :
-                <>
-                <h2>{"Game over. You won!"}</h2>
-                </>
-            :
-                this.isDraw()?
-                <h2>{"Game over. The game was a draw!"}</h2>
-                :
-                <h2>{(this.state.isPlayerANext===this.props.isPlayerA)? "It is your turn" : "It is your opponent's turn"}</h2>
-            }
+            <Button
+                style={{margin: '0 auto', display: "flex"}}
+                disabled={this.state.gameLoserIsA!==null || this.isDraw()}
+                variant="contained"
+                color="primary"
+                onClick={()=>{socket.emit('surrender', {gameID: this.props.id, loserIsPlayerA: this.props.isPlayerA})}}>Surrender</Button>
         </React.Fragment>)
         
     }
 }
+Game.contextType = GameContext
 
 export default Game

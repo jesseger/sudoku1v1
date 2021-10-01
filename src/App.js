@@ -1,32 +1,56 @@
-import logo from './logo.svg';
 import './App.css';
-import Game from './sudoku/game.js';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import React, { useState } from 'react';
 import EntryPage from './connection/entrypage.js';
 import GamePage from './connection/gamepage.js';
+import { createTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
+import { GameContext } from './context';
+
+const colorTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#23B5D3',
+    },
+    secondary: {
+      main: '#75ABBC',
+    },
+    contrastThreshold: 3,
+    tonalOffset: 0.2,
+  },
+  typography: {
+    fontFamily: 'Roboto'
+  },
+  button:{
+    color: 'secondary'
+  }
+});
 
 function App() {
-  //Page has to be changed on redirect and on button click in EntryPage
-  const [didRedirect, setDidRedirect] = React.useState(false)
-  const [userName, setUserName] = React.useState('')
+  const [didRedirect, setDidRedirect] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [opponentName, setOpponentName] = useState('') 
 
   return(  
+      <GameContext.Provider value = {{myName: userName, oppName: opponentName, setMyName: setUserName, setOppName: setOpponentName}}> 
+      <ThemeProvider theme={colorTheme}>
       <Router>
         <Switch>
           <Route path = "/" exact>
-            <EntryPage setUserName={setUserName} setDidRedirect={setDidRedirect} isCreator={true}/>
+            <EntryPage setDidRedirect={setDidRedirect} isCreator={true}/>
           </Route>
           <Route path = "/game/:gameid" exact>
             {didRedirect ? 
-              <GamePage isCreator={true} username={userName} />
+              <GamePage isCreator={true}/>
               :
-              <EntryPage setUserName={setUserName} setDidRedirect={setDidRedirect} isCreator={false}/>
+              <EntryPage setDidRedirect={setDidRedirect} isCreator={false}/>
             }
           </Route>
           <Redirect to = "/" />
         </Switch>
       </Router>
+      </ThemeProvider>
+      </GameContext.Provider>
   )
 }
 

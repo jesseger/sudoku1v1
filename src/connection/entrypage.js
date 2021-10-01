@@ -2,16 +2,17 @@ import React from 'react'
 import { v4 } from 'uuid'
 import { Redirect, useParams } from 'react-router-dom'
 import GamePage from './gamepage.js'
-import Slider from '@material-ui/core/Slider'
+import { Button, Typography, Input, Slider } from '@material-ui/core';
+import { GameContext } from '../context';
 const socket  = require('../connection/socket').socket //Our client socket
 
 class EntryPage extends React.Component{
     state = {
         didGetUserName: false,
         userName: "",
-        userInput: "", //button has to be disabled if empty
-        difficulty: 64,
-        timeInSeconds: 20//300
+        userInput: "", 
+        difficulty: 50,
+        timeInSeconds: 300
     }
 
     constructor(props){
@@ -31,7 +32,7 @@ class EntryPage extends React.Component{
 
         console.log("this.gameID: ", this.gameID)
 
-        //Make server create new room
+        //Make server create a new room
         socket.emit("createNewGame", {gameID: this.gameID, difficulty: this.state.difficulty, timeInSeconds: this.state.timeInSeconds});
     }
 
@@ -55,24 +56,25 @@ class EntryPage extends React.Component{
                 return <Redirect to = {"/game/" + this.gameID}></Redirect>
             }
             else{
-                // Let player type in name
+                // Let player enter username and settings
                 return(
                     <React.Fragment>
-                        <h1>Type in your username:</h1>
-                        <input type="text" value={this.state.userInput} ref={this.userInputField} onChange = {this.handleUserInput}/>
-                        <h2 id="difficulty">Difficulty: </h2>
+                        <div className="container">
+                        <div style={{display: "flex", flexDirection: "column", justifyContent: "space-between", textAlign: "center"}}>
+                        <Typography variant="h3">Please enter your username:</Typography>
+                        <Input placeholder="Username" ref={this.userInputField} onChange = {this.handleUserInput} inputProps={{ 'aria-label': 'description' }} fullWidth={true} />
+                        <Typography variant="h3">Difficulty:</Typography>  
                         <Slider
-                        defaultValue={60}
+                        defaultValue={50}
                         aria-labelledby="difficulty"
                         step={1}
                         min={17}
                         max={67}
                         marks={[{value:17,label: "Impossible"}, {value:67,label:"Very easy"}]}
                         valueLabelDisplay="auto"
-                        style={{width: 200, marginLeft:200}}
                         onChangeCommitted={this.handleDifficultyCommitted}
                         />
-                        <h2 id="time">Time per person: </h2> 
+                        <Typography variant="h3">Time per person:</Typography>
                         <Slider
                         defaultValue={300}
                         aria-labelledby="time"
@@ -83,19 +85,22 @@ class EntryPage extends React.Component{
                         track={false}
                         valueLabelDisplay="auto"
                         valueLabelFormat={value => <div>{(String(Math.floor(value/60))<10?"0":"")+String(Math.floor(value/60))+":"+String(value%60)+(String(value%60)<10?"0":"")}</div>}
-                        style={{width: 200, marginLeft:200}}
                         onChangeCommitted={this.handleTimeCommitted}
                         />
-                        <button 
-                        disabled = {!(this.state.userInput.length > 0)} 
+                        <Button 
+                        variant="contained"
+                        color="primary"
+                        disabled ={!(this.state.userInput.length > 0)} 
                         onClick ={() =>{
                             this.createRoom()
-                            
                             var newUsername = this.state.userInput
-                            this.props.setUserName(newUsername) 
-                            this.setState({didGetUserName: true, userName: newUsername})
-                            console.log("EntryPage.state.userName: ",this.state.userName) 
-                        }}> Create Game </button>
+                            this.context.setMyName(newUsername) 
+                            this.setState({didGetUserName: true}) 
+                        }}
+                        style={{margin: '0 auto', display: "flex"}}
+                        >Create Game</Button>
+                        </div>
+                        </div>
                     </React.Fragment>
                 )
             }
@@ -108,27 +113,32 @@ class EntryPage extends React.Component{
             else{
                 // Let player type in name
                 return( 
-                    <div /*className="container"*/> 
-                        <h1 style={{textAlign: "center", marginTop: String((window.innerHeight / 3)) + "px"}}>Type in your username:</h1>
-                        <input type="text" value={this.state.userInput} ref={this.userInputField} onChange = {this.handleUserInput}/>
-        
-                        <button 
-                        disabled = {!(this.state.userInput.length > 0)}
+                    <div className="container"> 
+                        <div className="inner"> 
+                        <Typography variant="h3">Please enter your username:</Typography>
+                        <Input placeholder="Username" ref={this.userInputField} onChange = {this.handleUserInput} inputProps={{ 'aria-label': 'description' }} fullWidth={true}/>
+                        <Button 
+                        variant="contained"
+                        color="primary"
+                        disabled ={!(this.state.userInput.length > 0)} 
                         onClick ={() =>{
                             const {joiningGameID} = this.props.params
                             this.gameID = joiningGameID
                             
                             var newUsername = this.state.userInput
-                            this.props.setUserName(newUsername) 
-                            this.setState({didGetUserName: true, userName: newUsername})
-                            console.log("EntryPage.state.userName: ",this.state.userName)
-                        }}> Join Game </button>
+                            this.context.setMyName(newUsername) 
+                            this.setState({didGetUserName: true})
+                        }}
+                        style={{margin: '0 auto', marginTop:'10px', display: "flex"}}
+                        >Join Game</Button>
+                        </div>
                     </div>
                 )
             }
         }
     }
 }
+EntryPage.contextType = GameContext;
 
 //Can only use useParams hook in functional component 
 export default (props) => (

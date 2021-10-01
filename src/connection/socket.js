@@ -1,6 +1,5 @@
 import io from 'socket.io-client'
 
-//const URL = 'https://multiplayer-chess-game-app.herokuapp.com/' 
 const URL = 'http://localhost:4000/'
 
 const socket = io(URL)
@@ -8,7 +7,7 @@ const socket = io(URL)
 var mySocketID
 
 socket.on('gameWasCreated', data => {
-    console.log("A new game has been created! Game id: " + data.gameID + " Socket id: " + data.socketID)
+    console.log("A new game has been created. Game id: " + data.gameID + " Socket id: " + data.socketID)
     mySocketID = data.socketID
 })
 
