@@ -40,7 +40,7 @@ function App() {
             <EntryPage setDidRedirect={setDidRedirect} isCreator={true}/>
           </Route>
           <Route path = "/game/:gameid" exact>
-            {didRedirect ? 
+            {didRedirect? 
               <GamePage isCreator={true}/>
               :
               <EntryPage setDidRedirect={setDidRedirect} isCreator={false}/>

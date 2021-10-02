@@ -45,6 +45,7 @@ export default function GamePage(props) {
                 setIsPlayerA(!data.creatorIsPlayerA)
                 context.setOppName(data.username1) 
             }
+            console.log('playerTwoJoined: ', data)
         })
 
         socket.on('OtherPlayerLeft',()=>{
@@ -98,11 +99,12 @@ export default function GamePage(props) {
             {
             context.oppName === "" 
             ?
-                <div className="container">
-                    <div className="inner">
+                <div className="centeredVertHori">
+                    <div className="centeredHalfWidth">
+                    <Typography variant="h3"><b>{context.myName}</b>, invite a friend <br/> by sending them the following link:</Typography>
                     <TextField
                     id="gameLink"
-                    label="Share this link with a friend"
+                    label="Share this link"
                     value= {window.location.href}
                     fullWidth={true}
                     onFocus={event => {event.target.select()}}
@@ -113,14 +115,16 @@ export default function GamePage(props) {
                             setDidCopyLink(true)
                             }}>Copy</Button>
                         </Tooltip>}}
+                    style={{paddingBottom: "20px"}}
                     />
-                    <Typography variant="h3">Waiting for opponent to connect..</Typography>
                     <Board gameBoard={gameBoard[0]} onSquareChange ={(row,col,val) =>{return}}/>
-                    <Typography variant="h3">{context.myName}</Typography>
+                    <Typography variant="h3">Waiting for opponent to connect..</Typography>
                     </div>
+                    
+                    
                 </div>
             :
-                <div className="container">
+                <div className="centeredVertHori">
                     <Popup trigger={openPopup} disableTrigger={()=>{setOpenPopup(false)}}>
                         <Typography variant="h3">Game over.</Typography>
                         <Typography variant="h1" style={{fontWeight: "bold", marginBottom:"20px"}}>{gameLoserIsA===null?"It's a draw.": gameLoserIsA===isPlayerA?"You lost.":"You won!"}</Typography>

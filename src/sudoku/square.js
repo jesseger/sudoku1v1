@@ -26,7 +26,7 @@ export default function Square({value, onSquareChange}) {
                     <tr key={row}>
                         {
                             [0,1,2].map((col)=>
-                                <td onClick={(e)=> handleClick(e, row*3+col +1)} onContextMenu={(e)=>handleClick(e, row*3+col +1)}>
+                                <td key={col} onClick={(e)=> handleClick(e, row*3+col +1)} onContextMenu={(e)=>handleClick(e, row*3+col +1)}>
                                     <span>{candidates[row*3+col +1]?row*3+col +1:""}</span>
                                 </td>
                             )
