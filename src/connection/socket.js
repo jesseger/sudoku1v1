@@ -1,6 +1,6 @@
 import io from 'socket.io-client'
 
-const URL = 'http://localhost:4000/'
+const URL = 'https://sudoku-1v1-backend.herokuapp.com/'
 
 const socket = io(URL)
 

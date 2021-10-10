@@ -13,6 +13,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "socket.io-client": "2.3.0",
+    "use-sound": "^4.0.1",
     "uuid": "^8.3.0",
     "uuidv4": "^6.2.11",
     "web-vitals": "^1.1.2"

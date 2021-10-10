@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import Game from '../sudoku/game.js'
-import Board from '../sudoku/board.js'
 import { Typography, TextField, Button, Tooltip, Slider } from '@material-ui/core';
 import Popup from '../components/popup.js'
 import { GameContext } from '../context';
 import avatarA from '../assets/playerA.jpg'
 import avatarB from '../assets/playerB.jpg'
+import useSound from 'use-sound';
+import myMoveSfx from '../assets/myMove.mp3'
+import oppMoveSfx from '../assets/oppMove.mp3'
 
 const socket  = require('./socket').socket //Our client socket
 
@@ -25,6 +27,8 @@ export default function GamePage(props) {
     const context = useContext(GameContext)
 
     const { gameid } = useParams()
+    const [myMoveSound] = useSound(myMoveSfx)
+    const [oppMoveSound] = useSound(oppMoveSfx)
 
     useEffect(() =>{
         socket.emit('playerJoinsGame', {gameID: gameid, username: context.myName}) 
@@ -45,7 +49,6 @@ export default function GamePage(props) {
                 setIsPlayerA(!data.creatorIsPlayerA)
                 context.setOppName(data.username1) 
             }
-            console.log('playerTwoJoined: ', data)
         })
 
         socket.on('OtherPlayerLeft',()=>{
@@ -101,7 +104,7 @@ export default function GamePage(props) {
             ?
                 <div className="centeredVertHori">
                     <div className="centeredHalfWidth">
-                    <Typography variant="h3"><b>{context.myName}</b>, invite a friend <br/> by sending them the following link:</Typography>
+                    <Typography variant="h3">Invite a friend, <b>{context.myName}</b>:</Typography>
                     <TextField
                     id="gameLink"
                     label="Share this link"
@@ -117,7 +120,6 @@ export default function GamePage(props) {
                         </Tooltip>}}
                     style={{paddingBottom: "20px"}}
                     />
-                    <Board gameBoard={gameBoard[0]} onSquareChange ={(row,col,val) =>{return}}/>
                     <Typography variant="h3">Waiting for opponent to connect..</Typography>
                     </div>
                     
@@ -153,7 +155,6 @@ export default function GamePage(props) {
                                 min={60}
                                 max={900}
                                 marks={[{value:60,label: "1 minute"}, {value:900,label:"15 minutes"}]}
-                                track={false}
                                 valueLabelDisplay="auto"
                                 valueLabelFormat={value => <div>{(String(Math.floor(value/60))<10?"0":"")+String(Math.floor(value/60))+":"+String(value%60)+(String(value%60)<10?"0":"")}</div>}
                                 onChange={handleDurationChange}
@@ -172,7 +173,7 @@ export default function GamePage(props) {
                     </Popup>
                     <div className="inner">
                     <Game key={gameCounter} gameCounter={gameCounter} initialBoard={gameBoard[0]} solvedBoard={gameBoard[1]} isPlayerA={isPlayerA} 
-                    id={gameid} timeInMs={gameDuration*1000} onGameOver={handleGamePageOver}/> 
+                    id={gameid} timeInMs={gameDuration*1000} onGameOver={handleGamePageOver} myMoveSound={myMoveSound} oppMoveSound={oppMoveSound}/> 
                     {gameLoserIsA!==null?
                     <Button variant="outlined"
                     disabled={openPopup}

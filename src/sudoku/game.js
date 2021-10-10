@@ -15,6 +15,7 @@ class Game extends React.Component {
         };
         this.solvedBoard =props.solvedBoard
         this.wrongIndex=-1
+        this.lastIndex=-1
         this.handleSquareChange=this.handleSquareChange.bind(this)
         this.myClock = React.createRef()
         this.opponentClock = React.createRef()
@@ -32,16 +33,21 @@ class Game extends React.Component {
         if (data.isPlayerANext === this.props.isPlayerA) {
           this.opponentClock.current.pause();
           this.myClock.current.start();
+          this.props.oppMoveSound()
+          
         } else {
           this.opponentClock.current.start();
           this.myClock.current.pause();
+          this.props.myMoveSound();
         }
         let idx = data.col + 9 * data.row;
         let boardAfterOppMove =
           this.state.gameBoard.substring(0, idx) +
           data.val +
           this.state.gameBoard.substring(idx + 1);
+        this.lastIndex = idx;
         this.wrongIndex = data.gameLoserIsA!==null ? idx : this.wrongIndex;
+        
         this.setState({
           gameBoard: boardAfterOppMove,
           gameLoserIsA: data.gameLoserIsA,
@@ -117,7 +123,7 @@ class Game extends React.Component {
         return( 
         <React.Fragment>
             <Clock isWhite={!this.props.isPlayerA} name={this.context.oppName} ref={this.opponentClock} date={this.endTime} onTimeOut={() => this.handleTimeOut(false)}/>
-            <Board gameBoard={this.state.gameBoard} onSquareChange={this.handleSquareChange} wrongIndex={this.wrongIndex}/>
+            <Board gameBoard={this.state.gameBoard} onSquareChange={this.handleSquareChange} wrongIndex={this.wrongIndex} lastIndex={this.lastIndex}/>
             <Clock isWhite={this.props.isPlayerA} name={this.context.myName} ref={this.myClock} date={this.endTime} onTimeOut={() => this.handleTimeOut(true)}/>
 
             <Button

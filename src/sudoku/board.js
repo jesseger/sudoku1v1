@@ -1,7 +1,7 @@
 import Square from './square.js';
 import React from 'react'
 
-export default function board({ gameBoard, onSquareChange, wrongIndex }) {
+export default function board({ gameBoard, onSquareChange, wrongIndex, lastIndex }) {
     return (
         <table className="sudokuboard">
         <tbody>
@@ -10,7 +10,7 @@ export default function board({ gameBoard, onSquareChange, wrongIndex }) {
                     <tr key={row}>
                         {
                             [...Array(9).keys()].map((col)=>
-                                <td key={col} className={wrongIndex===col+row*9? 'wrongCell' : 'correctCell'} onContextMenu={(e)=>{e.preventDefault()}}>
+                                <td key={col} className={wrongIndex===col+row*9? 'wrongCell' : lastIndex===col+row*9?'lastPlayedCell':'correctCell'} onContextMenu={(e)=>{e.preventDefault()}}>
                                     <Square value={gameBoard.charAt(col+row*9)} onSquareChange={(e) => (onSquareChange(row, col, e.target.value))}/>
                                 </td>
                             )

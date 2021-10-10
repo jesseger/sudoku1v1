@@ -25,12 +25,9 @@ class EntryPage extends React.Component{
     createRoom(){
         //Create new gameID
         const newGameID = v4();
-        console.log("newGameID: ", newGameID)
 
         //Store it
         this.gameID = newGameID;
-
-        console.log("this.gameID: ", this.gameID)
 
         //Make server create a new room
         socket.emit("createNewGame", {gameID: this.gameID, difficulty: this.state.difficulty, timeInSeconds: this.state.timeInSeconds});
@@ -61,11 +58,11 @@ class EntryPage extends React.Component{
                     <div className="centeredVertHori">
                     <div className="botMarginChildren">
                         <div>
-                            <Typography variant="h3">Your username:</Typography>
+                            <Typography variant="h3" className="standard">Your username:</Typography>
                             <Input placeholder="Username" ref={this.userInputField} onChange = {this.handleUserInput} inputProps={{ 'aria-label': 'description' }} fullWidth={true} />
                         </div>
                         <div>
-                            <Typography variant="h3">Difficulty:</Typography>  
+                            <Typography variant="h3" className="standard">Difficulty:</Typography>  
                             <Slider
                             defaultValue={50}
                             aria-labelledby="difficulty"
